@@ -432,6 +432,40 @@ static inline unsigned long __msecs_to_jiffies(const unsigned int m)
  * code, __msecs_to_jiffies() is called if the value passed does not
  * allow constant folding and the actual conversion must be done at
  * runtime.
+ * the _msecs_to_jiffies helpers are the HZ dependent conversion
+ * routines found in include/linux/jiffies.h
+ */
+static inline unsigned long __msecs_to_jiffies(const unsigned int m)
+{
+	/*
+	 * Negative value, means infinite timeout:
+	 */
+	if ((int)m < 0)
+		return MAX_JIFFY_OFFSET;
+	return _msecs_to_jiffies(m);
+}
+
+/**
+ * msecs_to_jiffies: - convert milliseconds to jiffies
+ * @m:	time in milliseconds
+ *
+ * conversion is done as follows:
+ *
+ * - negative values mean 'infinite timeout' (MAX_JIFFY_OFFSET)
+ *
+ * - 'too large' values [that would result in larger than
+ *   MAX_JIFFY_OFFSET values] mean 'infinite timeout' too.
+ *
+ * - all other values are converted to jiffies by either multiplying
+ *   the input value by a factor or dividing it with a factor and
+ *   handling any 32-bit overflows.
+ *   for the details see __msecs_to_jiffies()
+ *
+ * msecs_to_jiffies() checks for the passed in value being a constant
+ * via __builtin_constant_p() allowing gcc to eliminate most of the
+ * code, __msecs_to_jiffies() is called if the value passed does not
+ * allow constant folding and the actual conversion must be done at
+ * runtime.
  * the HZ range specific helpers _msecs_to_jiffies() are called both
  * directly here and from __msecs_to_jiffies() in the case where
  * constant folding is not possible.
