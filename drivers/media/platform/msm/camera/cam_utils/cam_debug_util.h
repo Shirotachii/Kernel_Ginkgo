@@ -69,8 +69,10 @@
  * @fmt       :  Formatted string which needs to be print in the log
  *
  */
-void cam_debug_log(unsigned int module_id, const char *func, const int line,
-	const char *fmt, ...);
+static inline void cam_debug_log(unsigned int module_id, const char *func,
+				 const int line, const char *fmt, ...)
+{
+}
 
 #if CAM_DEBUG_LOGGING
 /*
@@ -80,7 +82,10 @@ void cam_debug_log(unsigned int module_id, const char *func, const int line,
  *
  * @module_id :  Module ID which is using this function
  */
-const char *cam_get_module_name(unsigned int module_id);
+static inline const char *cam_get_module_name(unsigned int module_id)
+{
+	return NULL;
+}
 
 /*
  * CAM_ERR
@@ -91,8 +96,7 @@ const char *cam_get_module_name(unsigned int module_id);
  * @args     :  Arguments which needs to be print in log
  */
 #define CAM_ERR(__module, fmt, args...)                            \
-	pr_err("CAM_ERR: %s: %s: %d " fmt "\n",                     \
-		cam_get_module_name(__module), __func__,  __LINE__, ##args)
+	cam_debug_log(__module, __func__, __LINE__, fmt, ##args)
 /*
  * CAM_WARN
  * @brief    :  This Macro will print warning logs
@@ -102,8 +106,7 @@ const char *cam_get_module_name(unsigned int module_id);
  * @args     :  Arguments which needs to be print in log
  */
 #define CAM_WARN(__module, fmt, args...)                           \
-	pr_warn("CAM_WARN: %s: %s: %d " fmt "\n",                     \
-		cam_get_module_name(__module), __func__,  __LINE__, ##args)
+	cam_debug_log(__module, __func__, __LINE__, fmt, ##args)
 /*
  * CAM_INFO
  * @brief    :  This Macro will print Information logs
@@ -113,8 +116,7 @@ const char *cam_get_module_name(unsigned int module_id);
  * @args     :  Arguments which needs to be print in log
  */
 #define CAM_INFO(__module, fmt, args...)                           \
-	pr_info("CAM_INFO: %s: %s: %d " fmt "\n",                     \
-		cam_get_module_name(__module), __func__,  __LINE__, ##args)
+	cam_debug_log(__module, __func__, __LINE__, fmt, ##args)
 
 /*
  * CAM_INFO_RATE_LIMIT
@@ -125,8 +127,7 @@ const char *cam_get_module_name(unsigned int module_id);
  * @args     :  Arguments which needs to be print in log
  */
 #define CAM_INFO_RATE_LIMIT(__module, fmt, args...)                 \
-	pr_info_ratelimited("CAM_INFO: %s: %s: %d " fmt "\n",            \
-		cam_get_module_name(__module), __func__,  __LINE__, ##args)
+	cam_debug_log(__module, __func__, __LINE__, fmt, ##args)
 
 /*
  * CAM_INFO_RATE_LIMIT_CUSTOM
@@ -138,16 +139,7 @@ const char *cam_get_module_name(unsigned int module_id);
  * @fmt      :  Formatted string which needs to be print in log
  * @args     :  Arguments which needs to be print in log
  */
-#define CAM_INFO_RATE_LIMIT_CUSTOM(__module, interval, burst, fmt, args...) \
-	({								\
-		static DEFINE_RATELIMIT_STATE(_rs,			\
-			(interval * HZ),				\
-			burst);						\
-		if (__ratelimit(&_rs))					\
-			pr_info("CAM_INFO: %s: %s: %d " fmt "\n",	\
-				cam_get_module_name(__module), __func__,\
-				__LINE__, ##args);			\
-	})
+#define CAM_INFO_RATE_LIMIT_CUSTOM(__module, interval, burst, fmt, args...)
 
 /*
  * CAM_DBG
@@ -165,8 +157,7 @@ const char *cam_get_module_name(unsigned int module_id);
  * @brief    :  This Macro will print error print logs with ratelimit
  */
 #define CAM_ERR_RATE_LIMIT(__module, fmt, args...)                 \
-	pr_err_ratelimited("CAM_ERR: %s: %s: %d " fmt "\n",            \
-		cam_get_module_name(__module), __func__,  __LINE__, ##args)
+	cam_debug_log(__module, __func__, __LINE__, fmt, ##args)
 
 #else /* CAM_DEBUG_LOGGING */
 #define CAM_ERR(__module, fmt, args...) \
@@ -194,15 +185,6 @@ const char *cam_get_module_name(unsigned int module_id);
  * @fmt      :  Formatted string which needs to be print in log
  * @args     :  Arguments which needs to be print in log
  */
-#define CAM_ERR_RATE_LIMIT_CUSTOM(__module, interval, burst, fmt, args...) \
-	({								\
-		static DEFINE_RATELIMIT_STATE(_rs,			\
-			(interval * HZ),				\
-			burst);						\
-		if (__ratelimit(&_rs))					\
-			pr_err("CAM_ERR: %s: %s: %d " fmt "\n",		\
-				cam_get_module_name(__module), __func__,\
-				__LINE__, ##args);			\
-	})
+#define CAM_ERR_RATE_LIMIT_CUSTOM(__module, interval, burst, fmt, args...)
 
 #endif /* _CAM_DEBUG_UTIL_H_ */
