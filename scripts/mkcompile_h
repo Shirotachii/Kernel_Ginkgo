@@ -83,9 +83,10 @@ UTS_TRUNCATE="cut -b -$UTS_LEN"
     CC_VERSION="$KBUILD_COMPILER_STRING"
   fi
 
+  CC_VERSION=$($CC -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//' \
+		      | sed '1!d;s/ (http.\+)//g')
   LD_VERSION=$($LD -v | head -n1 | sed 's/(compatible with [^)]*)//' \
-		      | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
-
+		      | sed 's/[[:space:]]*$//' | sed '1!d;s/ (http.\+)//g')
   printf '#define LINUX_COMPILER "%s"\n' "$CC_VERSION, $LD_VERSION"
   ) > .tmpcompile
 
