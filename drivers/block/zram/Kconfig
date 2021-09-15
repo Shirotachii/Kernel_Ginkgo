@@ -79,3 +79,13 @@ config ZRAM_SIZE_OVERRIDE
 	int "ZRAM size to set from kernel. (e.g) set 4GB using config: ZRAM_SIZE_OVERRIDE=4"
 	range 1 16
 	default 2
+
+config ZRAM_FIXED_COMP_ALGORITHM
+	bool "Make ZRAM compression algorithm immutable"
+	depends on ZRAM
+	default n
+	help
+	  With this feature, userspace will never be able to modify the default
+	  ZRAM compression.
+
+	  If unsure, say N.
