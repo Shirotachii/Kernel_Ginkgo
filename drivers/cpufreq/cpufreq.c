@@ -33,6 +33,7 @@
 #include <linux/sched/topology.h>
 #include <linux/sched/sysctl.h>
 #include <linux/battery_saver.h>
+#include <linux/binfmts.h>
 
 #include <trace/events/power.h>
 
@@ -791,6 +792,9 @@ static ssize_t store_scaling_governor(struct cpufreq_policy *policy,
 	int ret;
 	char	str_governor[16];
 	struct cpufreq_policy new_policy;
+
+	if (task_is_booster(current))
+		return -EINVAL;
 
 	memcpy(&new_policy, policy, sizeof(*policy));
 
