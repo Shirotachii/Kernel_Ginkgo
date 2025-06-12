@@ -363,9 +363,9 @@ HOST_LFS_LIBS := $(shell getconf LFS_LIBS 2>/dev/null)
 
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -Wno-deprecated-declarations -O2 \
+HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -Wno-deprecated-declarations -O3 \
 		-fomit-frame-pointer -std=gnu89 -pipe $(HOST_LFS_CFLAGS)
-HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS)
+HOSTCXXFLAGS := -O3 $(HOST_LFS_CFLAGS)
 HOSTLDFLAGS  := $(HOST_LFS_LDFLAGS)
 HOST_LOADLIBES := $(HOST_LFS_LIBS)
 
@@ -694,9 +694,6 @@ endif
 
 export LLVM_AR LLVM_NM
 
-# Set O3 optimization level for LTO
-LDFLAGS		+= --plugin-opt=O3
-
 endif
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
@@ -717,36 +714,31 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
 else
-KBUILD_CFLAGS   += -O3 -ffp-contract=fast
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mcpu=cortex-a53 -mtune=cortex-a53
-
+KBUILD_CFLAGS   += -O3
+KBUILD_CFLAGS	+= -march=armv8.2-a+lse+fp16+dotprod -mcpu=cortex-a53+crypto+crc
+#Enable fast FMA optimizationsMore actions
+KBUILD_CFLAGS	+= -ffp-contract=fast
+#Enable MLGO for register allocation.
+KBUILD_CFLAGS	+= -mllvm -regalloc-enable-advisor=release
+#Enable hot cold split optimization
+KBUILD_CFLAGS	+= -mllvm -hot-cold-split=true
 ifdef CONFIG_LLVM_POLLY
 KBUILD_CFLAGS	+= -mllvm -polly \
-		   -mllvm -polly-run-inliner \
 		   -mllvm -polly-ast-use-context \
-		   -mllvm -polly-detect-keep-going \
 		   -mllvm -polly-invariant-load-hoisting \
-		   -mllvm -polly-vectorizer=stripmine \
-		   -mllvm -polly-loopfusion-greedy=1 \
-		   -mllvm -polly-reschedule=1 \
-		   -mllvm -polly-postopts=1 \
-		   -mllvm -polly-num-threads=0 \
-		   -mllvm -polly-omp-backend=LLVM \
-		   -mllvm -polly-scheduling=dynamic \
-		   -mllvm -polly-scheduling-chunksize=1
-
+		   -mllvm -polly-run-inliner \
+		   -mllvm -polly-vectorizer=stripmine
 # Polly may optimise loops with dead paths beyound what the linker
-# can understand. This may negate the effect of the linker's DCE
-# so we tell Polly to perfom proven DCE on the loops it optimises
-# in order to preserve the overall effect of the linker's DCE.
+# # can understand. This may negate the effect of the linker's DCE
+# # so we tell Polly to perfom proven DCE on the loops it optimises
+# # in order to preserve the overall effect of the linker's DCE.
 ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
 KBUILD_CFLAGS	+= -mllvm -polly-run-dce
 endif
-endif # CONFIG_LLVM_POLLY
-
-endif # $(cc-name),clang
-endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
+endif
+endif
+endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
@@ -822,7 +814,14 @@ KBUILD_CFLAGS += $(call cc-option,-fno-delete-null-pointer-checks,)
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
 ifeq ($(ld-name),lld)
-LDFLAGS += -O3 --lto-O3
+ifdef CONFIG_LTO_CLANG
+LDFLAGS += --plugin-opt=O3
+else
+LDFLAGS += -O3
+endif
+LDFLAGS += -mllvm -mcpu=cortex-a53
+LDFLAGS += -mllvm -regalloc-enable-advisor=release
+LDFLAGS += -mllvm -enable-ml-inliner=release
 endif
 
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
@@ -1978,3 +1977,5 @@ FORCE:
 # Declare the contents of the .PHONY variable as phony.  We keep that
 # information in a variable so we can use it in if_changed and friends.
 .PHONY: $(PHONY)
+
+KBUILD_CFLAGS += -w
