@@ -716,7 +716,7 @@ KBUILD_CFLAGS   += -Os
 else
 ifeq ($(cc-name),clang)
 KBUILD_CFLAGS   += -O3
-KBUILD_CFLAGS	+= -march=armv8.2-a+lse+fp16+dotprod -mcpu=cortex-a53+crypto+crc
+KBUILD_CFLAGS	+= -march=armv8-a+lse+fp16+dotprod -mcpu=cortex-a73+crypto+crc
 #Enable fast FMA optimizationsMore actions
 KBUILD_CFLAGS	+= -ffp-contract=fast
 #Enable MLGO for register allocation.
@@ -737,6 +737,14 @@ ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
 KBUILD_CFLAGS	+= -mllvm -polly-run-dce
 endif
 endif
+
+KBUILD_CFLAGS  += -mllvm -inline-threshold=1300
+KBUILD_CFLAGS  += -mllvm -inlinehint-threshold=2000
+KBUILD_CFLAGS  += -mllvm -unroll-threshold=900
+
+else
+KBUILD_CFLAGS   += -O3
+KBUILD_CFLAGS	+= -mcpu=cortex-a73.cortex-a53 -mtune=cortex-a73.cortex-a53
 endif
 endif
 
@@ -819,7 +827,7 @@ LDFLAGS += --plugin-opt=O3
 else
 LDFLAGS += -O3
 endif
-LDFLAGS += -mllvm -mcpu=cortex-a53
+LDFLAGS += -mllvm -mcpu=cortex-a73
 LDFLAGS += -mllvm -regalloc-enable-advisor=release
 LDFLAGS += -mllvm -enable-ml-inliner=release
 endif
@@ -907,7 +915,8 @@ endif
 
 ifdef CONFIG_LTO_CLANG
 ifdef CONFIG_THINLTO
-lto-clang-flags	:= -flto=thin
+lto-clang-flags	:= -funified-lto
+lto-clang-flags	+= -flto=thin
 LDFLAGS		+= --thinlto-cache-dir=.thinlto-cache
 else
 lto-clang-flags	:= -flto
