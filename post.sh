@@ -12,6 +12,7 @@ KBUILD_COMPILER_STRING=$(/workspace/ehhe/clang/bin/clang --version | head -n 1 |
 AK3_DIR="$KERNEL_DIR/AK3"
 PHONE="Redmi Note 8"
 DEVICE="Ginkgo"
+VARIANT="KSU"
 CHAT_ID="-1002377006405"
 TOKEN="7634058501:AAH3Wdk16hD50nACQM8JfgJhVRdwQKMkK1o"
 
@@ -38,7 +39,7 @@ function main() {
     echo -e ""
     echo -e " Create ZIP..."
     cd "$AK3_DIR" || exit
-    ZIP_NAME="${NAME_KERNEL}_${DEVICE}_$(date +'%d%m%Y_%H%M').zip"
+    ZIP_NAME="${NAME_KERNEL}_${DEVICE}_${VARIANT}_$(date +'%d%m%Y_%H%M').zip"
     zip -r9 "$ZIP_NAME" ./*
     echo  -e " Sukses!!!  "
     echo  -e " "
@@ -60,6 +61,7 @@ sendInfo "<b>------ ${KERNEL_NAME} ------</b>" \
   "<b>Device:</b> <code>${PHONE}</code>" \
   "<b>Name:</b> <code>${NAME_KERNEL}</code>" \
   "<b>Base:</b> <code>${BASE}</code>" \
+  "<b>Varian:</b> <code>${VARIANT}</code>" \
   "<b>Android:</b> <code>${ANDROID}</code>" \
   "<b>Commit:</b> <code>$(git log --pretty=format:'%h : %s' -2)</code>" \
   "<b>Compiler:</b> <code>${KBUILD_COMPILER_STRING}</code>"
