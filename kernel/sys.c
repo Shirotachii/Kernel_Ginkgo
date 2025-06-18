@@ -1196,6 +1196,7 @@ SYSCALL_DEFINE1(newuname, struct new_utsname __user *, name)
 	memcpy(&tmp, utsname(), sizeof(tmp));
 	if (!strncmp(current->comm, "bpfloader", 9) ||
 	    !strncmp(current->comm, "netbpfload", 10) ||
+	    !strncmp(current->comm, "uprobestatsbpfload", 18) ||
 	    !strncmp(current->comm, "netd", 4)) {
 		strcpy(tmp.release, "4.19.325");
 		pr_debug("fake uname: %s/%d release=%s\n",
