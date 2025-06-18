@@ -110,7 +110,7 @@ enum print_reason {
 #define CDP_CURRENT_UA			1500000
 #endif
 
-#define DCP_CURRENT_UA			2000000
+#define DCP_CURRENT_UA			2200000
 #define FLOAT_CURRENT_UA		1000000
 #define HVDCP2_CURRENT_UA		1500000
 #define HVDCP_CURRENT_UA		3000000
