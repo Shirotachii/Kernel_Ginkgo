@@ -12,7 +12,7 @@ KBUILD_COMPILER_STRING=$(/workspace/ehhe/clang/bin/clang --version | head -n 1 |
 AK3_DIR="$KERNEL_DIR/AK3"
 PHONE="Redmi Note 8"
 DEVICE="Ginkgo"
-VARIANT="KSU"
+VARIANT="SukiSU"
 CHAT_ID="-1002377006405"
 TOKEN="7634058501:AAH3Wdk16hD50nACQM8JfgJhVRdwQKMkK1o"
 
