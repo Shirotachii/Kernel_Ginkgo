@@ -78,7 +78,7 @@ push() {
         -F chat_id="$CHAT_ID" \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=html" \
-        -F caption="It's time to brick | <b>vayu</b>"
+        -F caption="It's time to brick | <b>${DEVICE}</b>"
 }
 
 # Finish
