@@ -72,16 +72,21 @@ compile() {
     make -j$(nproc --all) \
     O=${objdir} \
     ARCH=arm64 \
-    CC=clang \
     LD=ld.lld \
     AR=llvm-ar \
-    AS=llvm-as \
     NM=llvm-nm \
+    STRIP=llvm-strip \
     OBJCOPY=llvm-objcopy \
     OBJDUMP=llvm-objdump \
-    STRIP=llvm-strip \
-    CROSS_COMPILE=$ARCH_DIR/aarch64-linux-android- \
-    CROSS_COMPILE_ARM32=$ARM_DIR/arm-linux-androideabi- \
+    READELF=llvm-readelf \
+    HOSTCC=clang \
+    HOSTCXX=clang++ \
+    HOSTAR=llvm-ar \
+    HOSTLD=ld.lld \
+    LLVM=1 \
+    LLVM_IAS=1 \
+    CROSS_COMPILE=${ARCH_DIR}/aarch64-linux-android- \
+    CROSS_COMPILE_ARM32=${ARM_DIR}/arm-linux-androideabi- \
     CLANG_TRIPLE=aarch64-linux-gnu- \
     Image.gz-dtb \
     dtbo.img \
