@@ -405,7 +405,7 @@ struct bpf_prog *bpf_patch_insn_single(struct bpf_prog *prog, u32 off,
 		sizeof(*patch) * insn_rest);
 	memcpy(prog_adj->insnsi + off, patch, sizeof(*patch) * len);
 
-	bpf_adj_branches(prog_adj, off, insn_delta);
+	bpf_adj_branches(prog_adj, off, insn_delta, NULL);
 
 	bpf_adj_linfo(prog_adj, off, insn_delta);
 
