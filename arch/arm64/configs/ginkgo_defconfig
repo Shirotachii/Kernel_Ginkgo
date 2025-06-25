@@ -5887,3 +5887,6 @@ CONFIG_PROC_STRIPPED=y
 
 # oplus hacks
 CONFIG_OPLUS_MM_HACKS=y
+
+# adreno idler
+CONFIG_ADRENO_IDLER=y
