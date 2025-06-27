@@ -129,3 +129,6 @@ kernel/configs/android-*.cfg
 out/
 *.zip
 error.log
+AK3
+KernelSU/
+KernelSU-Next/
