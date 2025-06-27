@@ -131,7 +131,6 @@ static int compute_effective_progs(struct cgroup *cgrp,
 				    &p->bpf.progs[type], node) {
 			if (!pl->prog)
 				continue;
-			rcu_dereference_protected(progs, 1)->
 			progs->items[cnt].prog = pl->prog;
 			for_each_cgroup_storage_type(stype)
 				progs->items[cnt].cgroup_storage[stype] =

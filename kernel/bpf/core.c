@@ -300,7 +300,8 @@ int bpf_prog_calc_tag(struct bpf_prog *fp)
 	return 0;
 }
 
-static void bpf_adj_branches(struct bpf_prog *prog, u32 pos, u32 delta)
+static void bpf_adj_branches(struct bpf_prog *prog, u32 pos, u32 delta,
+			     const bool probe_pass)
 {
 	u32 i, insn_cnt = prog->len + (probe_pass ? delta : 0);
 	struct bpf_insn *insn = prog->insnsi;
@@ -404,7 +405,7 @@ struct bpf_prog *bpf_patch_insn_single(struct bpf_prog *prog, u32 off,
 		sizeof(*patch) * insn_rest);
 	memcpy(prog_adj->insnsi + off, patch, sizeof(*patch) * len);
 
-	bpf_adj_branches(prog_adj, off, insn_delta);
+	bpf_adj_branches(prog_adj, off, insn_delta, false);
 
 	bpf_adj_linfo(prog_adj, off, insn_delta);
 

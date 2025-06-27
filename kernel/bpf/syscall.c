@@ -701,6 +701,7 @@ static int map_lookup_elem(union bpf_attr *attr)
 			err = PTR_ERR(key);
 			goto err_put;
 		}
+	}
 
 	if ((attr->flags & BPF_F_LOCK) &&
 	    !map_value_has_spin_lock(map)) {
@@ -836,6 +837,7 @@ static int map_update_elem(union bpf_attr *attr)
 			err = PTR_ERR(key);
 			goto err_put;
 		}
+	}
 
 	if ((attr->flags & BPF_F_LOCK) &&
 	    !map_value_has_spin_lock(map)) {
