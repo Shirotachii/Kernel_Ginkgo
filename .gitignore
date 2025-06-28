@@ -135,7 +135,8 @@ clang/
 gcc64/
 gcc32/
 out/
+AK3/
 
 # Ignore KernelSU folders
 KernelSU-Next/
-drivers/kernelsu
+KernelSU/
