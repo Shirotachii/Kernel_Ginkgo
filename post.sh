@@ -2,7 +2,7 @@
 # Edit by Neko
 
 KERNEL_NAME="Kurumi Kernel"
-NAME_KERNEL="Kurumi+"
+NAME_KERNEL="Kurumi-overdrive"
 BASE="Rebase×Walt"
 ANDROID="11-15"
 KERNEL_DIR="$PWD"
