@@ -1230,6 +1230,13 @@ config SCHED_AUTOGROUP
 	  desktop applications.  Task group autogeneration is currently based
 	  upon task session.
 
+config SCHED_TUNE_DUMMY
+        bool "Create dummy SCHEDTUNE nodes"
+        depends on SMP
+        depends on !SCHED_TUNE && !CGROUP_SCHEDTUNE
+        help
+          Create dummy SCHEDTUNE nodes.
+
 config SCHED_TUNE
 	bool "Boosting for CFS tasks (EXPERIMENTAL)"
 	depends on SMP
@@ -1252,15 +1259,6 @@ config SCHED_TUNE
 	  utilization-driven frequency selection is in use).
 
 	  If unsure, say N.
-
-config SCHED_TUNE_DUMMY
-	bool "Create dummy SCHEDTUNE nodes"
-	depends on SMP
-	depends on !SCHED_TUNE && !CGROUP_SCHEDTUNE
-	help
-	  Create dummy SCHEDTUNE nodes.
-
-	If unsure, say N.
 
 config DEFAULT_USE_ENERGY_AWARE
 	bool "Default to enabling the Energy Aware Scheduler feature"
