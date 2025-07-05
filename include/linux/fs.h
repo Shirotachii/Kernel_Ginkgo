@@ -1659,7 +1659,7 @@ extern struct dentry *vfs_tmpfile(struct vfsmount *mnt,
 				  int open_flag);
 
 #ifdef CONFIG_COMPAT
-extern long compat_ptr_ioctl(struct file *file, unsigned int cmd,Add commentMore actions
+extern long compat_ptr_ioctl(struct file *file, unsigned int cmd,
 					unsigned long arg);
 #else
 #define compat_ptr_ioctl NULL
