@@ -3,7 +3,7 @@
 
 KERNEL_NAME="Kurumi Kernel"
 NAME_KERNEL="Kurumi-overdrive"
-BASE="Rebase×Walt"
+BASE="Rebase×Pelt"
 ANDROID="11-15"
 KERNEL_DIR="$PWD"
 KERNEL_IMG="$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb"
