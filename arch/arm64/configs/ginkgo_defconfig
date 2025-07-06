@@ -5906,7 +5906,7 @@ CONFIG_KSU_SUSFS_SUS_MOUNT=y
 
 # manual integration
 # CONFIG_KPROBES is not set
-CONFIG_HAVE_KPROBES=y
+# CONFIG_HAVE_KPROBES is not set
 # CONFIG_KPROBE_EVENTS is not set
 # CONFIG_KPROBE_EVENT is not set
 
