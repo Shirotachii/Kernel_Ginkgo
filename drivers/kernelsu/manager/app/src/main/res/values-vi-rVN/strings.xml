@@ -76,8 +76,8 @@
   <string name="enable_developer_options_summary">Hiển thị các cài đặt ẩn và thông tin gỡ lỗi chỉ dành cho nhà phát triển</string>
   <string name="module_overlay_fs_not_available">Các module không khả dụng vì OverlayFS đã bị vô hiệu hoá bởi Kernel!</string>
   <string name="refresh">Làm mới</string>
-  <string name="show_system_apps">Hiển thị ứng dụng hệ thống</string>
-  <string name="hide_system_apps">Ẩn ứng dụng hệ thống</string>
+  <string name="show_system_apps">Hiển thị các ứng dụng hệ thống</string>
+  <string name="hide_system_apps">Ẩn các ứng dụng hệ thống</string>
   <string name="export_log">Xuất nhật ký</string>
   <string name="safe_mode">Chế độ an toàn</string>
   <string name="reboot_to_apply">Khởi động lại để có hiệu lực</string>
