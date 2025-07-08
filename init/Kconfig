@@ -1235,8 +1235,6 @@ config SCHED_TUNE_DUMMY
 	help
 	  Create dummy SCHEDTUNE nodes.
 
-	If unsure, say N.
-
 config DEFAULT_USE_ENERGY_AWARE
 	bool "Default to enabling the Energy Aware Scheduler feature"
 	default n
