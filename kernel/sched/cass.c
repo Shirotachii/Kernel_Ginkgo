@@ -79,14 +79,14 @@ void cass_cpu_util(struct cass_cpu_cand *c, int this_cpu, bool sync)
 
 /*
  * Returns true if @c is a CPU with the maximum possible original capacity and
- * there's only one such CPU in the system (i.e., if @c is the prime CPU).
+ * there's only one such CPU in the system (i.e., if @c is the big CPU).
  */
 static __always_inline
-bool cass_prime_cpu(const struct cass_cpu_cand *c)
+bool cass_big_cpu(const struct cass_cpu_cand *c)
 {
 	/*
-	 * On arm64, the prime CPU is always the last CPU. If it doesn't have
-	 * the same original capacity as the prior CPU, then it is prime.
+	 * On arm64, the big CPU is always the last CPU. If it doesn't have
+	 * the same original capacity as the prior CPU, then it is big.
 	 */
 	return c->cpu == nr_cpu_ids - 1 &&
 	       arch_scale_cpu_capacity(nr_cpu_ids - 2) != SCHED_CAPACITY_SCALE;
@@ -118,7 +118,7 @@ bool cass_cpu_better(const struct cass_cpu_cand *a,
 		goto done;
 
 	/* Prefer the CPU that isn't the single fastest one in the system */
-	if (cass_cmp(cass_prime_cpu(b), cass_prime_cpu(a)))
+	if (cass_cmp(cass_big_cpu(b), cass_big_cpu(a)))
 		goto done;
 
 	/* Prefer the CPU with lower relative utilization */
@@ -210,10 +210,10 @@ static int cass_best_cpu(struct task_struct *p, int prev_cpu, bool sync, bool rt
 			/*
 			 * A non-idle candidate may be better for energy
 			 * efficiency when @p is uclamp boosted, or when the
-			 * only idle candidate found so far is the prime CPU.
+			 * only idle candidate found so far is the big CPU.
 			 * Otherwise, prefer idle candidates.
 			 */
-			if (!uc_min && !cass_prime_cpu(curr)) {
+			if (!uc_min && !cass_big_cpu(curr)) {
 				/* Discard any previous non-idle candidate */
 				if (!has_idle)
 					best = curr;
