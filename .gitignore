@@ -138,5 +138,6 @@ out/
 AK3/
 
 # Ignore KernelSU folders
+drivers/kernelsu
 KernelSU-Next/
 KernelSU/
