@@ -130,6 +130,7 @@ kernel/configs/android-*.cfg
 Android.bp
 
 # Ignore local folders
+AK3/
 AnyKernel3/
 clang/
 gcc64/
