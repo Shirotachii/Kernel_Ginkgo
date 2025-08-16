@@ -41,7 +41,6 @@ connmark_tg_shift(struct sk_buff *skb,
 		u8 shift_bits, u8 shift_dir)
 {
 	enum ip_conntrack_info ctinfo;
-	u_int32_t new_targetmark;
 	struct nf_conn *ct;
 	u_int32_t newmark;
 
@@ -62,26 +61,24 @@ connmark_tg_shift(struct sk_buff *skb,
 		}
 		break;
 	case XT_CONNMARK_SAVE:
-		new_targetmark = (skb->mark & info->nfmask);
-		if (shift_dir == D_SHIFT_RIGHT)
-			new_targetmark >>= shift_bits;
-		else
-			new_targetmark <<= shift_bits;
 		newmark = (ct->mark & ~info->ctmask) ^
-			  new_targetmark;
+			  (skb->mark & info->nfmask);
+		if (shift_dir == D_SHIFT_RIGHT)
+			newmark >>= shift_bits;
+		else
+			newmark <<= shift_bits;
 		if (ct->mark != newmark) {
 			ct->mark = newmark;
 			nf_conntrack_event_cache(IPCT_MARK, ct);
 		}
 		break;
 	case XT_CONNMARK_RESTORE:
-		new_targetmark = (ct->mark & info->ctmask);
-		if (shift_dir == D_SHIFT_RIGHT)
-			new_targetmark >>= shift_bits;
-		else
-			new_targetmark <<= shift_bits;
 		newmark = (skb->mark & ~info->nfmask) ^
-			  new_targetmark;
+			  (ct->mark & info->ctmask);
+		if (shift_dir == D_SHIFT_RIGHT)
+			newmark >>= shift_bits;
+		else
+			newmark <<= shift_bits;
 		skb->mark = newmark;
 		break;
 	}
