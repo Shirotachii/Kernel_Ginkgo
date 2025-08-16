@@ -20,8 +20,8 @@
 #include <linux/binfmts.h>
 #include "sched.h"
 
-#define UP_RATE_LIMIT_US		(20000)
-#define DOWN_RATE_LIMIT_US		(500)
+#define UP_RATE_LIMIT_US		(500)
+#define DOWN_RATE_LIMIT_US		(2000)
 
 struct sugov_tunables {
 	struct gov_attr_set attr_set;
