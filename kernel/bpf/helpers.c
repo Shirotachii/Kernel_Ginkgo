@@ -205,16 +205,15 @@ const struct bpf_func_proto bpf_get_current_cgroup_id_proto = {
 };
 #endif
 
-#ifdef CONFIG_CGROUP_BPF
-DECLARE_PER_CPU(void*, bpf_cgroup_storage[MAX_BPF_CGROUP_STORAGE_TYPE]);
+DECLARE_PER_CPU(void*, bpf_cgroup_storage);
 BPF_CALL_2(bpf_get_local_storage, struct bpf_map *, map, u64, flags)
 {
-	/* flags argument is not used now,
-	 * but provides an ability to extend the API.
-	 * verifier checks that its value is correct.
+	/* map and flags arguments are not used now,
+	 * but provide an ability to extend the API
+	 * for other types of local storages.
+	 * verifier checks that their values are correct.
 	 */
-	enum bpf_cgroup_storage_type stype = cgroup_storage_type(map);
-	return (unsigned long) this_cpu_read(bpf_cgroup_storage[stype]);
+	return (unsigned long) this_cpu_read(bpf_cgroup_storage);
 }
 const struct bpf_func_proto bpf_get_local_storage_proto = {
 	.func		= bpf_get_local_storage,
@@ -223,4 +222,3 @@ const struct bpf_func_proto bpf_get_local_storage_proto = {
 	.arg1_type	= ARG_CONST_MAP_PTR,
 	.arg2_type	= ARG_ANYTHING,
 };
-#endif
