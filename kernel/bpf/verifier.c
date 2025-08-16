@@ -4346,6 +4346,18 @@ static int is_state_visited(struct bpf_verifier_env *env, int insn_idx)
 	return 0;
 }
 
+static int ext_analyzer_insn_hook(struct bpf_verifier_env *env,
+				  int insn_idx, int prev_insn_idx)
+{
+	if (env->analyzer_ops && env->analyzer_ops->insn_hook)
+		return env->analyzer_ops->insn_hook(env, insn_idx,
+						    prev_insn_idx);
+	if (env->dev_ops && env->dev_ops->insn_hook)
+		return env->dev_ops->insn_hook(env, insn_idx, prev_insn_idx);
+
+	return 0;
+}
+
 /* Return true if it's OK to have the same insn return a different type. */
 static bool reg_type_mismatch_ok(enum bpf_reg_type type)
 {
@@ -4449,12 +4461,9 @@ static int do_check(struct bpf_verifier_env *env)
 			print_bpf_insn(env, insn);
 		}
 
-		if (bpf_prog_is_dev_bound(env->prog->aux)) {
-			err = bpf_prog_offload_verify_insn(env, env->insn_idx,
-							   env->prev_insn_idx);
-			if (err)
-				return err;
-		}
+		err = ext_analyzer_insn_hook(env, env->insn_idx, env->prev_insn_idx);
+		if (err)
+			return err;
 
 		regs = cur_regs(env);
 		env->insn_aux_data[env->insn_idx].seen = true;
@@ -5349,7 +5358,7 @@ int bpf_check(struct bpf_prog **prog, union bpf_attr *attr)
 	if (!IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS))
 		env->strict_alignment = true;
 
-	if (bpf_prog_is_dev_bound(env->prog->aux)) {
+	if (env->prog->aux->offload) {
 		ret = bpf_prog_offload_verifier_prep(env);
 		if (ret)
 			goto err_unlock;
