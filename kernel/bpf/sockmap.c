@@ -93,7 +93,7 @@ struct smap_psock_map_entry {
 struct smap_psock {
 	struct rcu_head	rcu;
 	/* refcnt is used inside sk_callback_lock */
-	refcount_t refcnt;
+	u32 refcnt;
 
 	/* datapath variables */
 	struct sk_buff_head rxqueue;
@@ -1064,13 +1064,15 @@ static void smap_destroy_psock(struct rcu_head *rcu)
 
 static void smap_release_sock(struct smap_psock *psock, struct sock *sock)
 {
-	if (refcount_dec_and_test(&psock->refcnt)) {
-		tcp_cleanup_ulp(sock);
-		smap_stop_sock(psock, sock);
-		clear_bit(SMAP_TX_RUNNING, &psock->state);
-		rcu_assign_sk_user_data(sock, NULL);
-		call_rcu_sched(&psock->rcu, smap_destroy_psock);
-	}
+	psock->refcnt--;
+	if (psock->refcnt)
+		return;
+
+	tcp_cleanup_ulp(sock);
+	smap_stop_sock(psock, sock);
+	clear_bit(SMAP_TX_RUNNING, &psock->state);
+	rcu_assign_sk_user_data(sock, NULL);
+	call_rcu_sched(&psock->rcu, smap_destroy_psock);
 }
 
 static int smap_parse_func_strparser(struct strparser *strp,
@@ -1209,7 +1211,7 @@ static struct smap_psock *smap_init_psock(struct sock *sock, int node)
 	INIT_WORK(&psock->tx_work, smap_tx_work);
 	INIT_WORK(&psock->gc_work, smap_gc_work);
 	INIT_LIST_HEAD(&psock->maps);
-	refcount_set(&psock->refcnt, 1);
+	psock->refcnt = 1;
 
 	rcu_assign_sk_user_data(sock, psock);
 	sock_hold(sock);
