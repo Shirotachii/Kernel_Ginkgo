@@ -22,8 +22,6 @@ struct perf_event;
 struct bpf_prog;
 struct bpf_map;
 struct sock;
-struct seq_file;
-struct btf;
 
 /* map is generic key/value storage optionally accesible by eBPF programs */
 struct bpf_map_ops {
@@ -51,14 +49,10 @@ struct bpf_map_ops {
 	void (*map_fd_put_ptr)(struct bpf_map *map, void *ptr, bool need_defer);
 	u32 (*map_gen_lookup)(struct bpf_map *map, struct bpf_insn *insn_buf);
 	u32 (*map_fd_sys_lookup_elem)(void *ptr);
-	void (*map_seq_show_elem)(struct bpf_map *map, void *key,
-				  struct seq_file *m);
-	int (*map_check_btf)(const struct bpf_map *map, const struct btf *btf,
-			     u32 key_type_id, u32 value_type_id);
 };
 
 struct bpf_map {
-	/* The first two cachelines with read-mostly members of which some
+	/* 1st cacheline with read-mostly members of which some
 	 * are also accessed in fast-path (e.g. ops, max_entries).
 	 */
 	const struct bpf_map_ops *ops ____cacheline_aligned;
@@ -74,13 +68,10 @@ struct bpf_map {
 	u32 pages;
 	u32 id;
 	int numa_node;
-	u32 btf_key_id;
-	u32 btf_value_id;
-	struct btf *btf;
 	bool unpriv_array;
-	/* 55 bytes hole */
+	/* 7 bytes hole */
 
-	/* The 3rd and 4th cacheline with misc members to avoid false sharing
+	/* 2nd cacheline with misc members to avoid false sharing
 	 * particularly with refcounting.
 	 */
 	struct user_struct *user ____cacheline_aligned;
@@ -111,12 +102,6 @@ static inline struct bpf_offloaded_map *map_to_offmap(struct bpf_map *map)
 {
 	return container_of(map, struct bpf_offloaded_map, map);
 }
-
-static inline bool bpf_map_support_seq_show(const struct bpf_map *map)
-{
-	return map->ops->map_seq_show_elem && map->ops->map_check_btf;
-}
-
 extern const struct bpf_map_ops bpf_map_offload_ops;
 
 /* function argument constraints */
