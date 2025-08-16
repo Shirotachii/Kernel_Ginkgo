@@ -882,8 +882,9 @@ struct tcp_skb_cb {
 #endif
 		} header;	/* For incoming skbs */
 		struct {
+			__u32 key;
 			__u32 flags;
-			struct sock *sk_redir;
+			struct bpf_map *map;
 			void *data_end;
 		} bpf;
 	};
