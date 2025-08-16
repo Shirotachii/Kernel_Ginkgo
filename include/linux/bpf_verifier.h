@@ -105,16 +105,6 @@ struct bpf_stack_state {
 	struct bpf_reg_state spilled_ptr;
 	u8 slot_type[BPF_REG_SIZE];
 };
-struct bpf_reference_state {
-	/* Track each reference created with a unique id, even if the same
-	 * instruction creates the reference multiple times (eg, via CALL).
-	 */
-	int id;
-	/* Instruction where the allocation of this reference occurred. This
-	 * is used purely to inform the user of a reference leak.
-	 */
-	int insn_idx;
-};
 
 /* state of the program:
  * type of all registers and stack info
@@ -133,9 +123,7 @@ struct bpf_func_state {
 	 * zero == main subprog
 	 */
 	u32 subprogno;
-	/* The following fields should be last. See copy_func_state() */
-	int acquired_refs;
-	struct bpf_reference_state *refs;
+	/* should be second to last. See copy_func_state() */
 	int allocated_stack;
 	struct bpf_stack_state *stack;
 };
@@ -247,16 +235,11 @@ struct bpf_verifier_env {
 	u32 subprog_cnt;
 };
 
-static inline struct bpf_func_state *cur_func(struct bpf_verifier_env *env)
+static inline struct bpf_reg_state *cur_regs(struct bpf_verifier_env *env)
 {
 	struct bpf_verifier_state *cur = env->cur_state;
 
-	return cur->frame[cur->curframe];
-}
-
-static inline struct bpf_reg_state *cur_regs(struct bpf_verifier_env *env)
-{
-	return cur_func(env)->regs;
+	return cur->frame[cur->curframe]->regs;
 }
 
 int bpf_prog_offload_verifier_prep(struct bpf_verifier_env *env);
