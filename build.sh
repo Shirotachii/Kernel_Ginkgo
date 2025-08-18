@@ -9,7 +9,7 @@ CCACHE=$(command -v ccache)
 objdir="${kernel_dir}/out"
 LOCAL_DIR="/workspace/ehhe"
 TC_DIR="${LOCAL_DIR}/toolchain"
-CLANG_DIR="${TC_DIR}/clang-rastamod"
+CLANG_DIR="${TC_DIR}/clang"
 ARCH_DIR="${TC_DIR}/aarch64-linux-android-4.9"
 ARM_DIR="${TC_DIR}/arm-linux-androideabi-4.9"
 export CONFIG_FILE="ginkgo_defconfig"
@@ -23,11 +23,16 @@ export KBUILD_BUILD_VERSION="1"
 # Setup toolchains & optional KernelSU
 setup() {
     if ! [ -d "${CLANG_DIR}" ]; then
-        echo "Clang not found! Cloning to ${TC_DIR}..."
-        if ! git clone --depth=1 -b clang-21.0 https://gitlab.com/kutemeikito/rastamod69-clang ${CLANG_DIR}; then
-            echo "Cloning failed! Aborting..."
+        echo "Clang not found! Downloading Google prebuilt..."
+        mkdir -p "${CLANG_DIR}"
+        wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/0998f421320ae02fddabec8a78b91bf7620159f6/clang-r563880.tar.gz -O clang.tar.gz
+        if [ $? -ne 0 ]; then
+            echo "Download failed! Aborting..."
             exit 1
         fi
+        echo "Extracting clang to ${CLANG_DIR}..."
+        tar -xf clang.tar.gz -C "${CLANG_DIR}"
+        rm -f clang.tar.gz
     fi
 
     if ! [ -d "${ARCH_DIR}" ]; then
