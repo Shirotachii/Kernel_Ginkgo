@@ -139,6 +139,9 @@ compile() {
 
 # Check if build succeeded
 completion() {
+    COMPILED_IMAGE=${objdir}/arch/arm64/boot/Image.gz-dtb
+    COMPILED_DTBO=${objdir}/arch/arm64/boot/dtbo.img
+
 if [ -f "out/arch/arm64/boot/Image.gz-dtb" ] && [ -f "out/arch/arm64/boot/dtbo.img" ]; then
 echo -e "\nKernel compiled succesfully! Zipping up...\n"
 git restore arch/arm64/configs/$DEFCONFIG
