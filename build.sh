@@ -25,7 +25,7 @@ setup() {
     if ! [ -d "${CLANG_DIR}" ]; then
         echo "Clang not found! Downloading Google prebuilt..."
         mkdir -p "${CLANG_DIR}"
-        wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-main-llvm-toolchain-source/clang-r574158.tar.gz -O clang.tar.gz
+        wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/ebcc6c3bef363bc539ea39f45b6abae1dce6ff1a/clang-r574158.tar.gz -O clang.tar.gz
         if [ $? -ne 0 ]; then
             echo "Download failed! Aborting..."
             exit 1
