@@ -1,0 +1,52 @@
+name: build kernel
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set Timezone
+        run: sudo ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+      
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential bc bison flex \
+            libssl-dev libelf-dev libfl-dev libncursesw5-dev \
+            aria2 curl wget git ccache python3 python3-pip \
+            zip unzip tar gzip bzip2 lz4 zstd \
+            device-tree-compiler libarchive-tools ca-certificates
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2.23
+        with:
+          key: build-kernel-${{ env.DEVICE }}${{ env.LOCALVERSION }}${{ env.UPLOADNAME }}
+          max-size: 2G
+      
+      - name: Build Kernel
+        run: |
+          chmod +x build.sh
+          ./build.sh --ksu
+
+      - name: Find ZIP
+        id: find_zip
+        run: |
+          ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
+          echo "ZIP_FILE=$ZIP_FILE" >> $GITHUB_ENV
+          echo "Found ZIP: $ZIP_FILE"
+
+      - name: Upload Kernel ZIP
+        uses: actions/upload-artifact@v7
+        with:
+          name: kernel-artifact
+          path: ${{ env.ZIP_FILE }}
