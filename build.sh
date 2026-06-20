@@ -58,7 +58,7 @@ setup() {
         rm -rf KernelSU drivers/kernelsu
 
         echo -e "\nKSU Support, let's Make it On\n"
-        curl -kLSs "https://raw.githubusercontent.com/OzoraID/KernelSU-Next/nongki-susfs/kernel/setup.sh" | bash -s nongki-susfs
+        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s legacy
 
         sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/arm64/configs/ginkgo_defconfig
     else
