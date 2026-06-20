@@ -139,24 +139,33 @@ compile() {
 
 # Check if build succeeded
 completion() {
-    COMPILED_IMAGE=${objdir}/arch/arm64/boot/Image.gz-dtb
-    COMPILED_DTBO=${objdir}/arch/arm64/boot/dtbo.img
-
-    if [[ -f ${COMPILED_IMAGE} && -f ${COMPILED_DTBO} ]]; then
-        echo ""
-        echo "############################################"
-        echo "####### Kernel Build Successful! ##########"
-        echo "############################################"
-        echo ""
-    else
-        echo ""
-        echo "############################################"
-        echo "##         Kernel Build Failed!           ##"
-        echo "## Please check the build log for errors. ##"
-        echo "############################################"
-        echo ""
-        exit 1
-    fi
+if [ -f "out/arch/arm64/boot/Image.gz-dtb" ] && [ -f "out/arch/arm64/boot/dtbo.img" ]; then
+echo -e "\nKernel compiled succesfully! Zipping up...\n"
+git restore arch/arm64/configs/$DEFCONFIG
+if [ -d "$AK3_DIR" ]; then
+cp -r $AK3_DIR AnyKernel3
+elif ! git clone -q https://github.com/Frenzy169/AnyKernel3; then
+echo -e "\nAnyKernel3 repo not found locally and cloning failed! Aborting..."
+exit 1
+fi
+cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
+cp out/arch/arm64/boot/dtbo.img AnyKernel3
+rm -f *zip
+cd AnyKernel3
+git checkout master &> /dev/null
+if [[ $1 = "-k" || $1 = "--ksu" ]]; then
+zip -r9 "../$ZIPNAME_KSU" * -x '*.git*' README.md *placeholder
+else
+zip -r9 "../$ZIPNAME" * -x '*.git*' README.md *placeholder
+fi
+cd ..
+rm -rf AnyKernel3
+rm -rf out/arch/arm64/boot
+echo -e "Completed in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
+echo "Zip: $ZIPNAME"
+else
+echo -e "\nCompilation failed!"
+fi
 }
 
 # Eksekusi urutan build
