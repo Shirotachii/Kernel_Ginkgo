@@ -139,15 +139,12 @@ compile() {
 
 # Check if build succeeded
 completion() {
-    COMPILED_IMAGE=${objdir}/arch/arm64/boot/Image.gz-dtb
-    COMPILED_DTBO=${objdir}/arch/arm64/boot/dtbo.img
-
 if [ -f "out/arch/arm64/boot/Image.gz-dtb" ] && [ -f "out/arch/arm64/boot/dtbo.img" ]; then
 echo -e "\nKernel compiled succesfully! Zipping up...\n"
 git restore arch/arm64/configs/$DEFCONFIG
 if [ -d "$AK3_DIR" ]; then
 cp -r $AK3_DIR AnyKernel3
-elif ! git clone -q https://github.com/Frenzy169/AnyKernel3; then
+elif ! git clone --depth=1 -b ginkgo https://github.com/OzoraID/AnyKernel3; then
 echo -e "\nAnyKernel3 repo not found locally and cloning failed! Aborting..."
 exit 1
 fi
