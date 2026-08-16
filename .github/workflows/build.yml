@@ -27,13 +27,6 @@ jobs:
             zip unzip tar gzip bzip2 lz4 zstd clang llvm \
             device-tree-compiler libarchive-tools ca-certificates
 
-      - name: Cache ccache
-        uses: actions/cache@v6
-        with:
-          path: ~/.ccache
-          key: ccache-kernel-${{ github.sha }}
-          restore-keys: ccache-kernel-
-
       - name: Build Kernel
         run: |
           chmod +x build.sh
