@@ -17,15 +17,30 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v7
 
-      - name: Install dependencies
+      - name: 🧹 Free disk space
         run: |
-         sudo apt-get update
-         sudo apt-get install -y \
-         build-essential make gcc g++ bc bison flex perl \
-         libssl-dev libelf-dev libfl-dev libncurses-dev \
-         curl wget git ccache python3 \
-         zip unzip tar gzip bzip2 lz4 zstd \
-         clang llvm lld device-tree-compiler
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          sudo docker image prune --all --force || true
+
+      - name: 📦 Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential bc bison flex libssl-dev libelf-dev \
+            git curl wget zip unzip python3 python-is-python3 \
+            cpio kmod rsync ccache dwarves libncurses-dev \
+            device-tree-compiler
+
+          if [ "$KERNEL_VERSION" = "4.4" ] || [ "$KERNEL_VERSION" = "4.14" ]; then
+            wget -q http://archive.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.10_amd64.deb || true
+            sudo dpkg -i libssl1.0.0_1.0.2n-1ubuntu5.10_amd64.deb 2>/dev/null || true
+          fi
+
+      - name: 🗃️ Setup ccache
+        run: |
+          mkdir -p ~/.ccache
+          echo "USE_CCACHE=1" >> $GITHUB_ENV
+          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
          
       - name: Build Kernel
         run: |
