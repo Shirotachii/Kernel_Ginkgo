@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Set Timezone
+      - name: ⏰ Set Timezone
         run: sudo ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
       
-      - name: Checkout source
+      - name: ⚡ Checkout source
         uses: actions/checkout@v7
 
       - name: 🧹 Free disk space
@@ -42,18 +42,18 @@ jobs:
           echo "USE_CCACHE=1" >> $GITHUB_ENV
           echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
          
-      - name: Build Kernel
+      - name: 🛠️ Build Kernel
         run: |
           bash build.sh --ksu
           
-      - name: Find ZIP
+      - name: 🔎 Find ZIP
         id: find_zip
         run: |
           ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
           echo "ZIP_FILE=$ZIP_FILE" >> $GITHUB_ENV
           echo "Found ZIP: $ZIP_FILE"
           
-      - name: Upload Kernel ZIP
+      - name: 💼 Upload Kernel ZIP
         uses: actions/upload-artifact@v7
         with:
           name: kernel-artifact
