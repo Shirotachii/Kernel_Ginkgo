@@ -6,15 +6,11 @@ on:
       commit_sha:
         description: 'Commit SHA to revert'
         required: true
-        default: 'c2681c7be74b1367b38402f8806b30eae1706856'
-      branch:
-        description: 'Branch to revert on'
-        required: true
-        default: 'main'
+        type: string
 
 jobs:
   revert:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
     
@@ -22,25 +18,40 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.inputs.branch }}
           fetch-depth: 0
 
       - name: Configure Git
         run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
 
       - name: Revert Commit
         run: |
-          git revert --no-edit ${{ github.event.inputs.commit_sha }}
+          echo "🔄 Reverting commit: ${{ github.event.inputs.commit_sha }}"
+          git revert --no-edit ${{ github.event.inputs.commit_sha }} || {
+            echo "❌ Revert failed - possible conflict"
+            exit 1
+          }
 
       - name: Push Changes
         run: |
-          git push origin ${{ github.event.inputs.branch }}
+          git push origin HEAD:${{ github.ref_name }}
+          echo "✅ Pushed to ${{ github.ref_name }}"
 
-      - name: Create Summary
+      - name: Summary
+        if: success()
         run: |
-          echo "✅ Commit ${{ github.event.inputs.commit_sha }} has been reverted on branch ${{ github.event.inputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Revert Success" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Reverted Commit:** \`${{ github.event.inputs.commit_sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** \`${{ github.event.inputs.branch }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Error Summary
+        if: failure()
+        run: |
+          echo "## ❌ Revert Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit SHA:** \`${{ github.event.inputs.commit_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Issue:** Check logs for conflict details" >> $GITHUB_STEP_SUMMARY
