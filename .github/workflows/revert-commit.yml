@@ -1,0 +1,46 @@
+name: Revert Commit
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to revert'
+        required: true
+        default: 'c2681c7be74b1367b38402f8806b30eae1706856'
+      branch:
+        description: 'Branch to revert on'
+        required: true
+        default: 'main'
+
+jobs:
+  revert:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
+      - name: Revert Commit
+        run: |
+          git revert --no-edit ${{ github.event.inputs.commit_sha }}
+
+      - name: Push Changes
+        run: |
+          git push origin ${{ github.event.inputs.branch }}
+
+      - name: Create Summary
+        run: |
+          echo "✅ Commit ${{ github.event.inputs.commit_sha }} has been reverted on branch ${{ github.event.inputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Reverted Commit:** \`${{ github.event.inputs.commit_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.event.inputs.branch }}\`" >> $GITHUB_STEP_SUMMARY
