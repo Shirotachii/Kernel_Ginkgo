@@ -11,17 +11,23 @@ on:
 jobs:
   cherry-pick:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Diperlukan agar token memiliki izin untuk push perubahan
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Mengambil seluruh history repository secara lengkap
 
       - name: Configure Git
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
 
-      - name: Fetch all history for all tags and branches
-        run: git fetch --all
+      - name: Fetch specific commit hash
+        run: |
+          # Mencoba fetch commit secara langsung dari remote, jika gagal fallback ke fetch --all
+          git fetch origin ${{ github.event.inputs.commit_hash }} || git fetch --all --unshallow || git fetch --all
 
       - name: Cherry-pick commit
         run: |
