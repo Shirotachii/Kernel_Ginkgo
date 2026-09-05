@@ -1,0 +1,34 @@
+name: Cherry-Pick Commit
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_hash:
+        description: 'Commit hash to cherry-pick'
+        required: true
+        type: string
+
+jobs:
+  cherry-pick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Fetch all history for all tags and branches
+        run: git fetch --all
+
+      - name: Cherry-pick commit
+        run: |
+          git cherry-pick ${{ github.event.inputs.commit_hash }}
+
+      - name: Push changes
+        run: |
+          git push origin HEAD
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
