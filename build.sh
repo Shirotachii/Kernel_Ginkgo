@@ -7,15 +7,17 @@ SECONDS=0
 kernel_dir="${PWD}"
 CCACHE=$(command -v ccache)
 objdir="${kernel_dir}/out"
-LOCAL_DIR="/workspace/ehhe"
+LOCAL_DIR="$(pwd)/.."
+ZIPNAME="Kirito-Kernel-Ginkgo-$(TZ=Asia/Jakarta date +"%Y%m%d-%H%M").zip"
+ZIPNAME_KSU="Kirito-Kernel-Ginkgo-KSUNext-$(TZ=Asia/Jakarta date +"%Y%m%d-%H%M").zip"
 TC_DIR="${LOCAL_DIR}/toolchain"
 CLANG_DIR="${TC_DIR}/clang"
 ARCH_DIR="${TC_DIR}/aarch64-linux-android-4.9"
 ARM_DIR="${TC_DIR}/arm-linux-androideabi-4.9"
 export CONFIG_FILE="ginkgo_defconfig"
 export ARCH="arm64"
-export KBUILD_BUILD_HOST="Weeaboo"
-export KBUILD_BUILD_USER="NekoTuru"
+export KBUILD_BUILD_HOST="Sword-Art-Online"
+export KBUILD_BUILD_USER="ShiroXD"
 export PATH="$CLANG_DIR/bin:$ARCH_DIR/bin:$ARM_DIR/bin:$PATH"
 export LD_LIBRARY_PATH="$CLANG_DIR/lib:$LD_LIBRARY_PATH"
 export KBUILD_BUILD_VERSION="1"
@@ -23,16 +25,11 @@ export KBUILD_BUILD_VERSION="1"
 # Setup toolchains & optional KernelSU
 setup() {
     if ! [ -d "${CLANG_DIR}" ]; then
-        echo "Clang not found! Downloading Google prebuilt..."
-        mkdir -p "${CLANG_DIR}"
-        wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/4d2864f08ff2c290563fb903a5156e0504620bbe/clang-r563880c.tar.gz -O clang.tar.gz
-        if [ $? -ne 0 ]; then
-            echo "Download failed! Aborting..."
+        echo "Clang not found! Cloning to ${TC_DIR}..."
+        if ! git clone --depth=1 -b clang-21.0 https://gitlab.com/kutemeikito/rastamod69-clang ${CLANG_DIR}; then
+            echo "Cloning failed! Aborting..."
             exit 1
         fi
-        echo "Extracting clang to ${CLANG_DIR}..."
-        tar -xf clang.tar.gz -C "${CLANG_DIR}"
-        rm -f clang.tar.gz
     fi
 
     if ! [ -d "${ARCH_DIR}" ]; then
@@ -56,8 +53,8 @@ setup() {
         rm -rf KernelSU drivers/kernelsu
 
         echo -e "\nKSU Support, let's Make it On\n"
-        curl -kLSs "https://raw.githubusercontent.com/OzoraID/KernelSU-Next/nongki-susfs/kernel/setup.sh" | bash -s nongki-susfs
-
+        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s legacy
+        
         sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/arm64/configs/ginkgo_defconfig
     else
         echo -e "\nKSU not Support, let's Skip\n"
@@ -141,22 +138,34 @@ compile() {
 completion() {
     COMPILED_IMAGE=${objdir}/arch/arm64/boot/Image.gz-dtb
     COMPILED_DTBO=${objdir}/arch/arm64/boot/dtbo.img
-
-    if [[ -f ${COMPILED_IMAGE} && -f ${COMPILED_DTBO} ]]; then
-        echo ""
-        echo "############################################"
-        echo "####### Kernel Build Successful! ##########"
-        echo "############################################"
-        echo ""
-    else
-        echo ""
-        echo "############################################"
-        echo "##         Kernel Build Failed!           ##"
-        echo "## Please check the build log for errors. ##"
-        echo "############################################"
-        echo ""
-        exit 1
-    fi
+    
+if [ -f "out/arch/arm64/boot/Image.gz-dtb" ] && [ -f "out/arch/arm64/boot/dtbo.img" ]; then
+echo -e "\nKernel compiled succesfully! Zipping up...\n"
+git restore arch/arm64/configs/$DEFCONFIG
+if [ -d "$AK3_DIR" ]; then
+cp -r $AK3_DIR AnyKernel3
+elif ! git clone --depth=1 -b ginkgo https://github.com/OzoraID/AnyKernel3; then
+echo -e "\nAnyKernel3 repo not found locally and cloning failed! Aborting..."
+exit 1
+fi
+cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
+cp out/arch/arm64/boot/dtbo.img AnyKernel3
+rm -f *zip
+cd AnyKernel3
+git checkout master &> /dev/null
+if [[ $1 = "-k" || $1 = "--ksu" ]]; then
+zip -r9 "../$ZIPNAME_KSU" * -x '*.git*' README.md *placeholder
+else
+zip -r9 "../$ZIPNAME" * -x '*.git*' README.md *placeholder
+fi
+cd ..
+rm -rf AnyKernel3
+rm -rf out/arch/arm64/boot
+echo -e "Completed in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
+echo "Zip: $ZIPNAME"
+else
+echo -e "\nCompilation failed!"
+fi
 }
 
 # Eksekusi urutan build
