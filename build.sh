@@ -53,7 +53,7 @@ setup() {
         rm -rf KernelSU drivers/kernelsu
 
         echo -e "\nKSU Support, let's Make it On\n"
-        curl -LSs "https://raw.githubusercontent.com/backslashxx/KernelSU/shockwave/kernel/setup.sh" | bash -s master
+        curl -LSs "https://raw.githubusercontent.com/backslashxx/KernelSU/master/kernel/setup.sh" | bash -s master
         curl https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/dev/kernel/setup.sh | bash -
 
         sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/arm64/configs/ginkgo_defconfig
