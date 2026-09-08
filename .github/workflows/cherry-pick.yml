@@ -3,6 +3,10 @@ name: Add Commit from Input
 on:
   workflow_dispatch:
     inputs:
+      remote_url:
+        description: 'Remote repository URL'
+        required: true
+        default: 'https://github.com/MrShockWAVEog/android_kernel_xiaomi_mt6768-k419.git'
       commit_sha:
         description: 'Commit SHA to cherry-pick'
         required: true
@@ -19,6 +23,7 @@ jobs:
         run: |
           commit_sha="${{ github.event.inputs.commit_sha }}"
           branch_name="${{ github.event.inputs.branch_name }}"
+          remote_url="${{ github.event.inputs.remote_url }}"
           
           # Validasi SHA
           if ! [[ $commit_sha =~ ^[a-f0-9]{40}$ ]] && ! [[ $commit_sha =~ ^[a-f0-9]{7}$ ]]; then
@@ -34,10 +39,17 @@ jobs:
             exit 1
           fi
           
+          # Validasi URL (basic check)
+          if ! [[ $remote_url =~ ^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+\.git$ ]]; then
+            echo "❌ ERROR: Invalid remote URL format!"
+            echo "   Format yang valid: https://github.com/owner/repo.git"
+            exit 1
+          fi
+          
           echo "✅ Input validation passed"
 
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.inputs.branch_name }}
           fetch-depth: 0
@@ -56,11 +68,14 @@ jobs:
 
       - name: Add Remote & Fetch
         run: |
-          git remote add upstream https://github.com/MrShockWAVEog/android_kernel_xiaomi_mt6768-k419.git
+          remote_url="${{ github.event.inputs.remote_url }}"
+          git remote add upstream "$remote_url"
           if ! git fetch upstream; then
-            echo "❌ ERROR: Failed to fetch from upstream!"
+            echo "❌ ERROR: Failed to fetch from remote!"
+            echo "   URL: $remote_url"
             exit 1
           fi
+          echo "✅ Fetch successful from: $remote_url"
 
       - name: Cherry-pick Commit
         run: |
@@ -86,6 +101,7 @@ jobs:
           echo "================================"
           echo "✅ Workflow Completed Successfully!"
           echo "================================"
+          echo "Remote URL: ${{ github.event.inputs.remote_url }}"
           echo "Commit SHA: ${{ github.event.inputs.commit_sha }}"
           echo "Branch: ${{ github.event.inputs.branch_name }}"
           echo "Repository: ${{ github.repository }}"
