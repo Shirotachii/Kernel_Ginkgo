@@ -1,0 +1,91 @@
+name: Add Commit from Input
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to cherry-pick'
+        required: true
+      branch_name:
+        description: 'Target branch name'
+        required: true
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Validate Input
+        run: |
+          commit_sha="${{ github.event.inputs.commit_sha }}"
+          branch_name="${{ github.event.inputs.branch_name }}"
+          
+          # Validasi SHA
+          if ! [[ $commit_sha =~ ^[a-f0-9]{40}$ ]] && ! [[ $commit_sha =~ ^[a-f0-9]{7}$ ]]; then
+            echo "❌ ERROR: Invalid commit SHA format!"
+            echo "   Format yang valid: 40 char (full) atau 7 char (short)"
+            exit 1
+          fi
+          
+          # Validasi branch name
+          if ! [[ $branch_name =~ ^[a-zA-Z0-9._/-]+$ ]]; then
+            echo "❌ ERROR: Invalid branch name!"
+            echo "   Hanya boleh: letters, numbers, dots, underscores, hyphens, slashes"
+            exit 1
+          fi
+          
+          echo "✅ Input validation passed"
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch_name }}
+          fetch-depth: 0
+        continue-on-error: true
+
+      - name: Checkout Failed Handler
+        if: failure()
+        run: |
+          echo "❌ ERROR: Branch '${{ github.event.inputs.branch_name }}' not found!"
+          exit 1
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Add Remote & Fetch
+        run: |
+          git remote add upstream https://github.com/MrShockWAVEog/android_kernel_xiaomi_mt6768-k419.git
+          if ! git fetch upstream; then
+            echo "❌ ERROR: Failed to fetch from upstream!"
+            exit 1
+          fi
+
+      - name: Cherry-pick Commit
+        run: |
+          if ! git cherry-pick ${{ github.event.inputs.commit_sha }}; then
+            echo "❌ ERROR: Cherry-pick failed!"
+            echo "   Commit mungkin tidak ada atau ada conflict"
+            git cherry-pick --abort
+            exit 1
+          fi
+          echo "✅ Cherry-pick successful"
+
+      - name: Push Changes
+        run: |
+          if ! git push origin ${{ github.event.inputs.branch_name }}; then
+            echo "❌ ERROR: Push failed!"
+            echo "   Check branch protection rules atau permissions"
+            exit 1
+          fi
+          echo "✅ Push successful"
+
+      - name: Success Summary
+        run: |
+          echo "================================"
+          echo "✅ Workflow Completed Successfully!"
+          echo "================================"
+          echo "Commit SHA: ${{ github.event.inputs.commit_sha }}"
+          echo "Branch: ${{ github.event.inputs.branch_name }}"
+          echo "Repository: ${{ github.repository }}"
