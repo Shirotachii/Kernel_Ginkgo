@@ -9,7 +9,7 @@ CCACHE=$(command -v ccache)
 objdir="${kernel_dir}/out"
 LOCAL_DIR="$(pwd)/.."
 ZIPNAME="Kirito-Kernel-Ginkgo-$(TZ=Asia/Jakarta date +"%Y%m%d-%H%M").zip"
-ZIPNAME_KSU="Kirito-Kernel-Ginkgo-KSUNext-$(TZ=Asia/Jakarta date +"%Y%m%d-%H%M").zip"
+ZIPNAME_KSU="Kirito-Kernel-Ginkgo-XXKSU-$(TZ=Asia/Jakarta date +"%Y%m%d-%H%M").zip"
 TC_DIR="${LOCAL_DIR}/toolchain"
 CLANG_DIR="${TC_DIR}/clang"
 ARCH_DIR="${TC_DIR}/aarch64-linux-android-4.9"
